@@ -1,191 +1,103 @@
-# cpp-obj-viewer
+# cpp-obj-viewer – Tiny CPU OBJ Model Viewer
 
-A small **C++17** OBJ model viewer with a **CPU z-buffer**, **simple lighting** and a **SFML HUD**.  
-Designed for **low-poly models** (`.obj` + `.mtl`) and to be easy to read as a portfolio project.
+This project is a small **C++17 OBJ viewer** with a **CPU software rasterizer**, a **z-buffer**, **simple lighting** and a **SFML HUD**.
+
+It’s designed for **low-poly `.obj` + `.mtl` models** and to be **easy to read** as a portfolio project.
 
 ---
 
-## ✨ Features (with explanations)
+## 1. Quick demo
 
-- **OBJ geometry loading**  
-  The viewer parses standard `.obj` files:
-  - vertex positions (`v`)
-  - face indices (`f`)
-  - optional vertex normals (`vn`)  
-  Faces are treated as triangles and stored in a simple internal structure for rendering.
+_(GIFs coming soon – example placeholders)_
 
-- **MTL material support (basic)**  
-  If you provide a `.mtl` file and `usemtl` entries in the `.obj`, the viewer:
+- ![Tree model](assets/gifs/tree.gif)
+- ![Fox model](assets/gifs/fox.gif)
+
+The viewer:
+- loads a low-poly model
+- applies per-face diffuse lighting
+- lets you toggle **wireframe** and **auto-rotation** from the HUD.
+
+---
+
+## 2. Features
+
+- **OBJ loader**
+  - vertices (`v`), faces (`f`), optional normals (`vn`)
+  - faces treated as triangles
+
+- **Basic MTL materials**
   - loads materials by name (`newmtl`)
-  - reads diffuse color (`Kd r g b`)
-  - associates each face with a material  
-  If no material is found, the model is rendered in plain white.
+  - uses diffuse color (`Kd r g b`) as base color
+  - falls back to **white** if no material / mismatch
 
-- **Software rasterizer with CPU z-buffer**  
-  The rendering pipeline is done on the CPU:
-  - each triangle is transformed and projected to screen space
-  - a depth buffer (z-buffer) is stored as a `std::vector<float>`
-  - pixels are drawn only if they are closer than the previously stored depth  
-  This allows correct visibility (far triangles do not overwrite nearer ones).
+- **CPU software rasterizer**
+  - manual projection + triangle rasterization
+  - depth handled by a `std::vector<float>` z-buffer
+  - correct visibility: nearer triangles overwrite farther ones
 
-- **Simple diffuse lighting (per-face)**  
-  For each triangle:
-  - a face normal is computed in world/view space
-  - a directional light is applied (Lambert: `intensity = max(0, dot(normal, lightDir))`)
-  - the base material color is multiplied by this intensity  
-  Result: faces directly facing the light are bright, others are darker.
+- **Simple lighting**
+  - one directional light
+  - per-face normal, Lambert shading: `max(0, dot(n, lightDir))`
 
-- **Wireframe mode**  
-  A dedicated rendering mode draws only the edges of triangles:
-  - useful to debug geometry
-  - visually shows the mesh topology  
-  This mode is toggled via a HUD button.
+- **Wireframe mode**
+  - draws only triangle edges
+  - handy to debug / show mesh topology
 
-- **Auto-rotation**  
-  The model can rotate automatically around the Y axis:
-  - allows you to showcase a model hands-free
-  - good for demos and GIF recordings  
-  Auto-rotate is toggled via a HUD button.
+- **Auto-rotation**
+  - model rotates around Y axis
+  - good for demos and GIFs
 
-- **Keyboard controls for camera / model**  
-  - **Arrow keys**: rotate model around X and Y axes  
-  - **W / S**: zoom in / zoom out (change scale)  
-  This makes it easy to inspect the model from any angle.
-
-- **HUD overlay with SFML**  
-  The project uses SFML to:
-  - open a window and handle events
-  - draw text information (current model, material name)
-  - draw simple UI buttons for:
-    - wireframe on/off
-    - auto-rotate on/off  
-
-- **Clean architecture (for reading the code)**  
-  The code is split into small, focused classes:
-  - `Model` – loads and stores OBJ/MTL data
-  - `Renderer` – CPU rasterizer, z-buffer, lighting
-  - `App` – window loop, input handling, HUD  
-  The goal is to keep each file and function easy to understand.
+- **SFML HUD**
+  - window + events
+  - text info (model / material)
+  - buttons for:
+    - **Wireframe** on/off  
+    - **Auto-rotate** on/off  
 
 ---
 
-## 🎮 Controls
+## 3. Build
 
-**Keyboard**
-
-- `←` / `→` : rotate model around Y axis  
-- `↑` / `↓` : rotate model around X axis  
-- `W` : zoom in  
-- `S` : zoom out  
-
-**Mouse**
-
-- Click on the **HUD buttons** at the bottom of the window:
-  - **Wireframe**: toggle edge-only rendering
-  - **Auto-rotate**: toggle continuous rotation
-
----
-
-## 📁 Project structure
-
-Example structure (you can adapt to your repo):
-
-```text
-cpp-obj-viewer/
-  src/
-    main.cpp
-    App.cpp
-    Renderer.cpp
-    Model.cpp
-    Math.cpp
-    ...
-  include/
-    App.hpp
-    Renderer.hpp
-    Model.hpp
-    Math.hpp
-    ...
-  assets/
-    models/
-      tree/
-        tree-branched.obj
-        tree-branched.mtl
-      fox/
-        RedFox.obj
-        RedFox.mtl
-      whale/
-        Whale.obj
-        Whale.mtl
-  Makefile
-  README.md
-```
-
-- `src/` : implementation files  
-- `include/` : headers for the main classes  
-- `assets/models/` : example low-poly models (tree, fox, whale, etc)  
-- `Makefile` : build rules (g++, C++17, SFML)
-
----
-
-## 🔧 Building
-
-The project uses:
+Requirements:
 
 - **C++17**
-- **SFML 3** (Graphics + Window + System)
+- **SFML 3** (Graphics, Window, System)
 
-### Example (macOS with Homebrew)
-
-Install SFML 3 (if not already):
+### macOS (Homebrew)
 
 ```bash
 brew install sfml
-```
-
-Build:
-
-```bash
 make
-```
-
-This will produce an executable named:
-
-```bash
 ./viewer
 ```
 
-If your SFML headers or libraries are not in the default locations, you may need to adjust include / lib paths in the `Makefile`, for example:
+If SFML is in a custom path, adjust the `Makefile`, e.g.:
 
 ```make
-CXX = g++
 CXXFLAGS = -Wall -Wextra -Werror -std=c++17 -Iinclude -I/opt/homebrew/opt/sfml/include
-LDFLAGS = -L/opt/homebrew/opt/sfml/lib           -lsfml-graphics -lsfml-window -lsfml-system
+LDFLAGS  = -L/opt/homebrew/opt/sfml/lib -lsfml-graphics -lsfml-window -lsfml-system
 ```
 
 ### Linux (example)
 
-Install SFML (package name may vary by distro):
-
 ```bash
 sudo apt install libsfml-dev
-```
-
-Then:
-
-```bash
 make
+./viewer
 ```
 
 ---
 
-## ▶️ Running
+## 4. Usage
 
 The viewer expects:
 
-- an **OBJ file** path
-- optionally: a **MTL file** path
+```bash
+./viewer <model.obj> [material.mtl]
+```
 
-Examples assuming you are in the repo root:
+Examples (from repo root):
 
 ```bash
 # Tree
@@ -198,88 +110,35 @@ Examples assuming you are in the repo root:
 ./viewer assets/models/whale/Whale.obj assets/models/whale/Whale.mtl
 ```
 
-If you **omit the MTL file**:
+If you omit the MTL file:
 
 ```bash
 ./viewer assets/models/tree/tree-branched.obj
 ```
 
-- The model still loads
-- Faces are rendered in **white** with lighting (default color)
+the model is still rendered, with **white** faces + lighting.
 
 ---
 
-## 🎨 Materials & Colors
+## 5. Controls
 
-The viewer supports a minimal subset of the **MTL format**:
+**Keyboard**
 
-- `newmtl <name>`  
-  Starts a new material with the given name.
+- `←` / `→` – rotate model around Y axis  
+- `↑` / `↓` – rotate model around X axis  
+- `W` – zoom in  
+- `S` – zoom out  
 
-- `Kd r g b`  
-  Diffuse color used as the base color of the face.  
-  Each `r g b` is expected in the range `[0.0, 1.0]`.
+**Mouse / HUD**
 
-In your `.obj`, you must reference materials like this:
-
-```obj
-mtllib tree-branched.mtl
-
-usemtl tree_bark_dark
-f 1 2 3
-f 2 3 4
-
-usemtl tree_green
-f 5 6 7
-f 6 7 8
-```
-
-If:
-
-- the `.mtl` file is missing  
-- or the `usemtl` name doesn’t match any loaded material  
-
-→ the viewer falls back to **white** for that face.
+- click **Wireframe** – toggle edge-only rendering  
+- click **Auto-rotate** – toggle automatic rotation  
 
 ---
 
-## 🧠 How it works (high-level pipeline)
+## 6. Adding your own models
 
-1. **Load model**
-   - `Model` parses OBJ vertices, faces and (optionally) normals
-   - If a MTL file is provided, it loads materials and assigns them to faces
-
-2. **Prepare camera & transforms**
-   - The model is centered and scaled
-   - Rotation around X/Y is updated from keyboard input or auto-rotate
-
-3. **Transform to view space**
-   - Each vertex goes from model space → view space using rotation + scale
-
-4. **Lighting**
-   - A directional light is defined (e.g. from above / front)
-   - For each face, a normal is computed and used for diffuse lighting
-
-5. **Projection**
-   - Vertices are projected to 2D screen coordinates (simple perspective or orthographic style)
-   - Coordinates are remapped to the window size
-
-6. **Rasterization with z-buffer**
-   - For each triangle, a bounding box is computed
-   - For every pixel in this box:
-     - barycentric coordinates are used to interpolate depth
-     - if this depth is closer than the stored depth → pixel is drawn and depth updated
-
-7. **Display**
-   - The CPU-rendered image is copied into a SFML texture
-   - The texture is drawn as a full-screen sprite
-   - Text + HUD buttons are drawn on top
-
----
-
-## ➕ Adding your own models
-
-1. **Put your files in `assets/models/...`**, e.g.:
+1. Put your files under `assets/models/...`, e.g.:
 
    ```text
    assets/models/dragon/
@@ -287,15 +146,44 @@ If:
      dragon.mtl
    ```
 
-2. **Make sure:**
-   - the `.obj` contains a line `mtllib dragon.mtl`
-   - the `.mtl` contains `newmtl <name>` and `Kd r g b` lines
-   - the `.obj` uses `usemtl <name>` for different parts
+2. In the OBJ:
+   - reference the material file: `mtllib dragon.mtl`
+   - use material names: `usemtl dragon_body`
 
-3. **Run:**
+3. In the MTL:
+   - define materials with `newmtl <name>`
+   - set diffuse color with `Kd r g b` (values in `[0.0, 1.0]`)
+
+4. Run:
 
    ```bash
    ./viewer assets/models/dragon/dragon.obj assets/models/dragon/dragon.mtl
    ```
 
 ---
+
+## 7. Project structure
+
+```text
+.
+├── include/
+│   ├── App.hpp        # Main loop, events, HUD
+│   ├── Renderer.hpp   # CPU rasterizer + z-buffer + lighting
+│   ├── Model.hpp      # OBJ/MTL loading and storage
+│   └── Math.hpp       # Small math helpers (vec, mat, etc.)
+├── src/
+│   ├── main.cpp
+│   ├── App.cpp
+│   ├── Renderer.cpp
+│   ├── Model.cpp
+│   └── Math.cpp
+├── assets/
+│   └── models/
+│       ├── tree/
+│       ├── fox/
+│       └── whale/
+├── Makefile
+└── README.md
+```
+
+The goal is to keep the code **small, explicit and easy to read** as a learning / portfolio project.
