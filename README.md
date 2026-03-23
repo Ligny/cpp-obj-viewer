@@ -11,8 +11,6 @@ It’s designed for **low-poly `.obj` + `.mtl` models** and to be **easy to read
 ### Tree model
 ![Tree demo](docs/media/tree.gif)
 
-### Fox model
-![Fox demo](docs/media/fox.gif)
 
 The viewer:
 - loads a low-poly model
