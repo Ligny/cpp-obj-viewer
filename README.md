@@ -9,10 +9,10 @@ It’s designed for **low-poly `.obj` + `.mtl` models** and to be **easy to read
 ## 1. Quick demo
 
 ### Tree model
-[Watch the tree demo](docs/media/tree-demo.mp4)
+![Tree demo](docs/media/tree-demo.gif)
 
 ### Fox model
-[Watch the fox demo](docs/media/fox-demo.mp4)
+![Fox demo](docs/media/fox-demo.gif)
 
 The viewer:
 - loads a low-poly model
