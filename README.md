@@ -8,10 +8,11 @@ It’s designed for **low-poly `.obj` + `.mtl` models** and to be **easy to read
 
 ## 1. Quick demo
 
-_(GIFs coming soon – example placeholders)_
+### Tree model
+[Watch the tree demo](docs/media/tree-demo.mov)
 
-- ![Tree model](assets/gifs/tree.gif)
-- ![Fox model](assets/gifs/fox.gif)
+### Fox model
+[Watch the fox demo](docs/media/fox-demo.mov)
 
 The viewer:
 - loads a low-poly model
